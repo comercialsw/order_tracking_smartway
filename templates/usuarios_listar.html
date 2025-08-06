@@ -1,1 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Usuários{% endblock %}
+{% block content %}
+<h2>Usuários</h2>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>E-mail</th>
+      <th>Perfil</th>
+      <th>Ativo</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for u in usuarios %}
+    <tr>
+        <td>{{ u[1] }}</td>       {# nome #}
+        <td>{{ u[2] }}</td>       {# email #}
+        <td>{{ u[3] }}</td>       {# perfil #}
+        <td>{{ 'Sim' if u[4] else 'Não' }}</td> {# ativo #}
+        <td>
+        <a href="{{ url_for('editar_usuario', id=u[0]) }}" class="btn btn-sm btn-primary">Editar</a>
+        <form action="{{ url_for('excluir_usuario', id=u[0]) }}" method="post" style="display:inline"
+              onsubmit="return confirm('Confirma exclusão?');">
+          <button class="btn btn-sm btn-danger">Excluir</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Paginação simples -->
+<nav>
+  <ul class="pagination">
+    {% if pagina > 1 %}
+    <li class="page-item">
+      <a class="page-link" href="{{ url_for('listar_usuarios', pagina=pagina-1) }}">Anterior</a>
+    </li>
+    {% endif %}
+    <li class="page-item disabled"><a class="page-link" href="#">{{ pagina }}</a></li>
+    {% if pagina < total_paginas %}
+    <li class="page-item">
+      <a class="page-link" href="{{ url_for('listar_usuarios', pagina=pagina+1) }}">Próximo</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+
+<a href="{{ url_for('criar_usuario') }}" class="btn btn-success">Novo usuário</a>
+{% endblock %}
 
