@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if action=='editar' else 'Novo' }} Usuário{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow-sm p-2" style="max-width: 380px; width: 100%; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
+    <h2 class="mb-4 text-center fw-semibold" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen;">{{ 'Editar' if action=='editar' else 'Novo' }} Usuário</h2>
+
+    <form method="post" novalidate>
+      <div class="mb-3">
+        <label class="form-label fw-medium" style="font-size: 0.9rem;">Nome</label>
+        <input type="text" class="form-control form-control-lg rounded-3" name="nome" required
+               value="{{ usuario[0] if usuario else '' }}" placeholder="Nome completo">
+      </div>
+      <div class="mb-3">
+        <label class="form-label fw-medium" style="font-size: 0.9rem;">E-mail</label>
+        <input type="email" class="form-control form-control-lg rounded-3" name="email" required
+               value="{{ usuario[1] if usuario else '' }}" placeholder="usuario@email.com">
+      </div>
+      <div class="mb-3">
+        <label class="form-label fw-medium" style="font-size: 0.9rem;">Senha {% if action == 'editar' %}(deixe em branco para manter){% endif %}</label>
+        <input type="password" class="form-control form-control-lg rounded-3" name="senha" {% if action != 'editar' %}required{% endif %} placeholder="Senha segura">
+      </div>
+      <div class="mb-4">
+        <label class="form-label fw-medium" style="font-size: 0.9rem;">Perfil</label>
+        <select name="perfil" class="form-select form-select-lg rounded-3" required>
+          <option value="" disabled {% if not usuario %}selected{% endif %}>Selecione o perfil</option>
+          <option value="admin" {% if usuario and usuario[2] == 'admin' %}selected{% endif %}>Admin</option>
+          <option value="editor" {% if usuario and usuario[2] == 'editor' %}selected{% endif %}>Editor</option>
+          <option value="visualizador" {% if usuario and usuario[2] == 'visualizador' %}selected{% endif %}>Visualizador</option>
+        </select>
+      </div>
+      {% if action == 'editar' %}
+      <div class="form-check mb-4">
+        <input type="checkbox" class="form-check-input" name="ativo" id="ativo" {% if usuario and usuario[3] %}checked{% endif %}>
+        <label class="form-check-label fw-medium" for="ativo">Ativo</label>
+      </div>
+      {% endif %}
+      <div class="d-flex justify-content-between">
+        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4"> {{ 'Salvar' if action=='editar' else 'Criar' }}</button>
+        <a href="{{ url_for('listar_usuarios') }}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
