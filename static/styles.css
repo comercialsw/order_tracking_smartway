@@ -1,0 +1,138 @@
+body {
+    background: #f5f5f8;
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+.login-container {
+    max-width: 340px;
+    margin: 60px auto;
+    padding: 2.5em 2em;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px #0002;
+    text-align: center;
+}
+.login-container img {
+    margin-bottom: 1em;
+}
+.login-container input {
+    width: 90%;
+    margin: 12px 0;
+    padding: 10px 8px;
+    font-size: 16px;
+    border: none;
+    border-bottom: 2px solid #eee;
+    background: #f9f9f9;
+    outline: none;
+    transition: border 0.2s;
+}
+.login-container input:focus {
+    border-bottom: 2px solid #FF7C1B;
+}
+.login-container button {
+    background: #FF7C1B;
+    color: #fff;
+    border-radius: 24px;
+    font-size: 18px;
+    padding: 10px 32px;
+    border: none;
+    box-shadow: 0 2px 12px rgba(255,124,27,0.10);
+    margin-top: 16px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+.login-container button:hover {
+    filter: brightness(0.93);
+}
+.login-hint {
+    color: #bbb;
+    font-size: 12px;
+    margin-top: 8px;
+}
+.flash.danger {
+    color: #fff;
+    background: #e55353;
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+
+.filtros-container form {
+    background: #fff;
+    padding: 16px 22px;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px #0001;
+    margin-bottom: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+.filtros-container input, .filtros-container select {
+    padding: 8px 10px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    font-size: 16px;
+}
+.filtros-container button {
+    background: #FF7C1B;
+    color: #fff;
+    border-radius: 18px;
+    padding: 8px 24px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.pedido-card {
+    background: #f8f8f8;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px #0001;
+    padding: 18px;
+    font-size: 17px;
+}
+.card-status {
+    font-size: 14px;
+    border-radius: 10px;
+    padding: 2px 12px;
+    margin-left: 8px;
+    background: #fff7;
+}
+.card-empty {
+    color: #888;
+    font-size: 16px;
+    text-align: center;
+    padding: 32px;
+}
+
+.tabela-container {
+    background: #fff;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px #0001;
+    margin-top: 32px;
+}
+.pedidos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 18px;
+}
+.pedidos-table th, .pedidos-table td {
+    border-bottom: 1px solid #f1f1f1;
+    padding: 10px 8px;
+    text-align: left;
+}
+.pedidos-table th {
+    background: #f8f8f8;
+    font-weight: 500;
+}
+.pedidos-table tr:hover {
+    background: #fffcf7;
+}
