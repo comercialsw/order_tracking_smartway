@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Order Tracking{% endblock %}</title>
+
+    <!-- Bootstrap 5.3 + ícones -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body         { background:#f8fafb; }
+        .nav-link.active{ background:#0d6efd!important; color:#fff!important; }
+        .brand-logo  { height:38px; }
+        .card-pedido { min-width:0; border-radius:14px; }  /* se ainda usar cartões */
+    </style>
+</head>
+<body>
+
+<!-- ---------- NAVBAR / MULTIPAGE ---------- -->
+<nav class="py-3 bg-white shadow-sm sticky-top border-bottom">
+    <div class="container-fluid d-flex align-items-center justify-content-between">
+
+        <!-- Logo à esquerda -->
+        <a class="d-flex align-items-center text-decoration-none" href="{{ url_for('login') }}">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="brand-logo me-2">
+        </a>
+
+        <!-- Menu central -->
+        <ul class="nav nav-pills mx-auto">
+            <li class="nav-item">
+                <a class="nav-link {% if active_page=='order_tracking' %}active{% endif %}"
+                   href="{{ url_for('order_tracking') }}">
+                   <i class="bi bi-truck me-1"></i>Order Tracking
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page=='pedidos_tabela' %}active{% endif %}"
+                   href="{{ url_for('pedidos_tabela') }}">
+                   <i class="bi bi-table me-1"></i>Pedidos
+                </a>
+            </li>
+        </ul>
+
+        <!-- Espaço à direita (pode colocar usuário, notificações etc.) -->
+
+
+        <!-- BOTAO GERENCIA USUARIOS -->
+
+
+        {% if session.perfil == 'admin' %}
+        <div class="mb-0 text-end">
+        <a href="{{ url_for('listar_usuarios') }}" class="btn btn-sm btn-primary">
+            <i class="bi bi-people"></i> Usuários
+        </a>
+        </div>
+        {% endif %}
+
+
+        <div class="mt-auto border-top p-3 small d-flex align-items-center justify-content-between">
+        <div>
+            <span>{{ session.usuario if session.get('usuario') else 'Guest' }}</span>
+        </div>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm ms-2"
+        title="Sair"><i class="bi bi-box-arrow-right"></i></a>
+        </div> 
+    </div>
+</nav>
+
+<!-- ---------- CONTEÚDO DAS PÁGINAS ---------- -->
+<main class="container-fluid py-4">
+    {% block content %}{% endblock %}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
