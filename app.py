@@ -11,14 +11,6 @@ from urllib.parse import urlencode
 from math import ceil
 from functools import wraps
 
-print("DB_HOST:", os.environ.get("DB_HOST"))
-print("DB_NAME:", os.environ.get("DB_NAME"))
-print("DB_USER:", os.environ.get("DB_USER"))
-print("DB_PASSWORD:", os.environ.get("DB_PASSWORD"))
-print("DB_PORT:", os.environ.get("DB_PORT"))
-
-
-
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
