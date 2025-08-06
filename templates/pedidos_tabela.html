@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Tabela de Pedidos{% endblock %}
+
+{% block content %}
+<div class="w-100 ps-0 pe-0"><!-- remove padding de .content-area -->
+
+    <!-- FILTROS ----------------------------------------------------- -->
+    <form class="row g-3 mb-4 align-items-end sticky-top bg-white pt-3 pb-2 border-bottom shadow-sm"
+      style="z-index:1050;" method="get">
+        <div class="col-sm-4 col-md-2">
+            <label class="form-label small mb-1">Pedido</label>
+            <input class="form-control" name="f_pedido" value="{{ filtros.f_pedido }}">
+        </div>
+        <div class="col-sm-4 col-md-2">
+            <label class="form-label small mb-1">Cliente</label>
+            <input class="form-control" name="f_cliente" value="{{ filtros.f_cliente }}">
+        </div>
+        <div class="col-sm-4 col-md-2">
+            <label class="form-label small mb-1">Status</label>
+            <select class="form-select" name="f_status">
+                {% for st in ['Todos','Aguardando Envio','Em Trânsito','Entregue','Atrasado'] %}
+                    <option value="{{ st }}" {% if filtros.f_status==st %}selected{% endif %}>{{ st }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-sm-6 col-md-2">
+            <label class="form-label small mb-1">Data Pedido Inicial</label>
+            <input type="date" class="form-control" name="f_data_ini" value="{{ filtros.f_data_ini }}">
+        </div>
+        <div class="col-sm-6 col-md-2">
+            <label class="form-label small mb-1">Data Pedido Final</label>
+            <input type="date" class="form-control" name="f_data_fim" value="{{ filtros.f_data_fim }}">
+        </div>
+        <div class="col-12 col-md-1 d-grid">
+            <button class="btn btn-primary" type="submit">Filtrar</button>
+        </div>
+    </form>
+
+    <!-- TABELA ------------------------------------------------------ -->
+    <div class="table-responsive shadow-sm rounded-3">
+        <table class="table table-hover align-middle mb-0 bg-white">
+            <thead class="table-light sticky-top">
+                <tr>
+                    <th>Pedido</th>
+                    <th>Status</th>
+                    <th>Cliente</th>
+                    <th>Nota Fiscal</th>
+                    <th>Data Pedido</th>
+                    <th>Situação Comercial</th>
+                    <th>Transportadora</th>
+                    <th>Rastreio</th>
+                    <th class="text-end">Frete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if not pedidos %}
+                    <tr><td colspan="9" class="text-center text-muted py-4">Nenhum pedido encontrado.</td></tr>
+                {% else %}
+                    {% for p in pedidos %}
+                    <tr>
+                        <td class="fw-semibold">{{ p.Pedido }}</td>
+                        <td>
+                            <span class="badge rounded-pill bg-{{
+                                'success'   if p.status_descricao=='Entregue' else
+                                'danger'    if p.status_descricao=='Atrasado' else
+                                'warning'   if p.status_descricao=='Aguardando Envio' else
+                                'info'      if p.status_descricao=='Em Trânsito' else
+                                'secondary' }}">
+                                {{ p.status_descricao or 'Sem status' }}
+                            </span>
+                        </td>
+                        <td>{{ p.Cliente }}</td>
+                        <td>{{ p.Nota_Fiscal }}</td>
+                        <td>{{ p.data_pedido }}</td>
+                        <td>{{ p.situacao_comercial }}</td>
+                        <td>{{ p.transportadora }}</td>
+                        <td>{{ p.cod_rastreamento }}</td>
+                        <td class="text-end">{{ p.frete }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PAGINAÇÃO MINIMALISTA ---------------------------------------- -->
+    <nav aria-label="Navegação de páginas" class="d-flex justify-content-center align-items-center my-3">
+      <button class="btn btn-outline-primary me-3" {% if page <= 1 %}disabled{% endif %}
+              onclick="location.href='{{ url_for('pedidos_tabela', page=page-1,
+                                                  f_pedido=filtros.f_pedido,
+                                                  f_cliente=filtros.f_cliente,
+                                                  f_status=filtros.f_status,
+                                                  f_data_ini=filtros.f_data_ini,
+                                                  f_data_fim=filtros.f_data_fim) }}'">
+        &laquo; Anterior
+      </button>
+
+      <span>Página {{ page }} de {{ total_pages }}</span>
+
+      <button class="btn btn-outline-primary ms-3" {% if page >= total_pages %}disabled{% endif %}
+              onclick="location.href='{{ url_for('pedidos_tabela', page=page+1,
+                                                  f_pedido=filtros.f_pedido,
+                                                  f_cliente=filtros.f_cliente,
+                                                  f_status=filtros.f_status,
+                                                  f_data_ini=filtros.f_data_ini,
+                                                  f_data_fim=filtros.f_data_fim) }}'">
+        Próximo &raquo;
+      </button>
+    </nav>
+
+</div><!-- /w-100 -->
+{% endblock %}
