@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+{% block title %}Order Tracking{% endblock %}
+
+{% block content %}
+<!-- FILTROS ----------------------------------------------------- -->
+<form class="row g-3 mb-4 align-items-end sticky-top bg-white pt-3 pb-2 border-bottom shadow-sm"
+      style="z-index:1050;" method="get">
+
+    <div class="col-sm-4 col-md-1">
+        <label class="form-label small mb-1">Pedido</label>
+        <input type="text" class="form-control" name="f_pedido" value="{{ filtros.f_pedido }}">
+    </div>
+    <div class="col-sm-4 col-md-2">
+        <label class="form-label small mb-1">Cliente</label>
+        <input type="text" class="form-control" name="f_cliente" value="{{ filtros.f_cliente }}">
+    </div>
+    <div class="col-sm-4 col-md-2">
+        <label class="form-label small mb-1">Status</label>
+        <select class="form-select" name="f_status">
+            {% for st in ['Todos','Aguardando Envio','Em Trânsito','Entregue','Atrasado'] %}
+                <option value="{{ st }}" {% if filtros.f_status==st %}selected{% endif %}>{{ st }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-sm-4 col-md-1">
+        <label class="form-label small mb-1">Nota Fiscal</label>
+        <input type="text" class="form-control" name="f_nota" value="{{ filtros.f_nota }}">
+    </div>
+    
+    <div class="col-sm-4 col-md-2">
+        <label class="form-label small mb-1">Data Inicial</label>
+        <input type="date" class="form-control" name="f_data_ini" value="{{ filtros.f_data_ini }}">
+    </div>
+    <div class="col-sm-4 col-md-2">
+        <label class="form-label small mb-1">Data Final</label>
+        <input type="date" class="form-control" name="f_data_fim" value="{{ filtros.f_data_fim }}">
+    </div>
+    <div class="col-12 col-md-1 d-grid">
+        <button class="btn btn-primary" type="submit">Filtrar</button>
+    </div>
+
+<!-- BOTAO EXPORTAR RELATORIO ----------------------------------------------------- -->
+
+    <div class="col-12 col-md-2 d-grid">
+    <a href="{{ url_for('exportar_pedidos', 
+        f_pedido=filtros.f_pedido, f_cliente=filtros.f_cliente,
+        f_status=filtros.f_status, f_data_ini=filtros.f_data_ini, f_data_fim=filtros.f_data_fim) }}" 
+       class="btn btn-success btn-sm">
+      <i class="bi bi-download"></i> Exportar XLSX
+    </a>
+  </div>
+    
+<!-- AVISO DE ATRASO ----------------------------------------------------- -->
+{% if atraso_entrega > 0 or atraso_expedicao > 0 %}
+<div class="alert alert-warning d-flex align-items-center" role="alert">
+  <i class="bi bi-exclamation-triangle-fill me-2"></i>
+  <div>
+    {% if atraso_entrega > 0 %}
+      Existem {{ atraso_entrega }} pedido{{ 's' if atraso_entrega > 1 else '' }} com entrega atrasada.<br>
+    {% endif %}
+    {% if atraso_expedicao > 0 %}
+      Existem {{ atraso_expedicao }} pedido{{ 's' if atraso_expedicao > 1 else '' }} com expedição atrasada.
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+
+<!-- AVISO ATUALIZA PEDIDO ----------------------------------------------------- -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+</form>
+
+
+
+<!-- CARDS -------------------------------------------------------- -->
+<div class="container-fluid">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+        {% if not pedidos %}
+            <div class="col"><div class="alert alert-secondary w-100 text-center">Nenhum pedido encontrado.</div></div>
+        {% else %}
+            {% for p in pedidos %}
+            <div class="col d-flex">
+                <div class="card card-pedido shadow-sm flex-fill h-100">
+                    <div class="card-body pb-3">
+                        <!-- Status e editar -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge rounded-pill bg-{{ 
+                                'success' if p.status_descricao=='Entregue'
+                                else 'danger' if p.status_descricao=='Atrasado'
+                                else 'warning' if p.status_descricao=='Aguardando Envio'
+                                else 'info' if p.status_descricao=='Em Trânsito'
+                                else 'secondary' }}">
+                                {{ p.status_descricao or 'Sem status' }}
+                            </span>
+                            {% if session.perfil in ['admin', 'editor'] %}
+                            <button class="btn btn-outline-primary btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editPedidoModal"
+                                    data-p-id="{{ p.id }}"
+                                    data-p-num="{{ p.Pedido }}"
+                                    data-p-status="{{ p.status_logistico_id }}"
+                                    data-p-prev="{{ p.data_previsao }}"
+                                    data-p-entr="{{ p.data_entrega }}"
+                                    data-p-exp="{{ p.data_expedicao }}"
+                                    data-p-transp="{{ p.transportadora|default('') }}"
+                                    data-p-rast="{{ p.cod_rastreamento|default('') }}"
+                                    data-p-frete="{{ p.frete|default('') }}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            {% endif %}
+
+                        </div>
+                        <div class="d-flex flex-wrap gap-3 small mb-1">
+                            <div><b>Pedido:</b> {{ p.Pedido }}</div>
+                            <div><b>Cliente:</b> {{ p.Cliente }}</div>
+                            <div><b>Nota:</b> {{ p.Nota_Fiscal }}</div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-3 small mb-1">
+                            <div><b>Data pedido:</b> {{ p.data_pedido }}</div>
+                            <div><b>Expedição:</b> {{ p.data_expedicao }}</div>
+                            <div><b>Previsão:</b> {{ p.data_previsao }}</div>
+                            <div><b>Entregue:</b> {{ p.data_entrega }}</div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-3 small mb-1">
+                            <div><b>Transportadora:</b> {{ p.transportadora }}</div>
+                            <div><b>Rastreio:</b> {{ p.cod_rastreamento }}</div>
+                            <div><b>Frete:</b> {{ p.frete }}</div>
+                        </div>
+                        <div class="mt-2 text-muted small">
+                            <b>Situação comercial:</b> {{ p.situacao_comercial }}
+                            {% if p['expedicao_atrasada'] %}
+                          <div class="alert alert-warning mt-2 p-2 small">
+                              <i class="bi bi-exclamation-triangle"></i>
+                              Expedição atrasada!
+                          </div>
+                          {% endif %}
+                        </div>
+                        {% if p['teve_expedicao_atrasada'] %}
+                            <div class="alert alert-info mt-2 p-2 small">
+                                <i class="bi bi-clock-history"></i>
+                                Este pedido teve expedição atrasada!
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+<!-- PAGINAÇÃO -------------------------------------------------------- -->
+    <nav aria-label="Navegação de páginas" class="d-flex justify-content-center align-items-center my-3">
+  <button class="btn btn-outline-primary me-3" {% if page <= 1 %}disabled{% endif %}
+          onclick="location.href='{{ url_for('order_tracking', page=page-1, **filtros) }}'">
+    &laquo; Anterior
+  </button>
+
+  <span>Página {{ page }} de {{ total_pages }}</span>
+
+  <button class="btn btn-outline-primary ms-3" {% if page >= total_pages %}disabled{% endif %}
+          onclick="location.href='{{ url_for('order_tracking', page=page+1, **filtros) }}'">
+    Próximo &raquo;
+  </button>
+</nav>
+
+
+</div>
+
+<!-- MODAL DE EDIÇÃO ----------------------------------------------- -->
+<div class="modal fade" id="editPedidoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="post" action="/editar_pedido" class="modal-content">
+      {{ form.csrf_token }}
+
+      <!-- Campos hidden para manter filtros -->
+      <input type="hidden" name="f_pedido" value="{{ filtros.f_pedido }}">
+      <input type="hidden" name="f_cliente" value="{{ filtros.f_cliente }}">
+      <input type="hidden" name="f_status" value="{{ filtros.f_status }}">
+      <input type="hidden" name="f_data_ini" value="{{ filtros.f_data_ini }}">
+      <input type="hidden" name="f_data_fim" value="{{ filtros.f_data_fim }}">
+
+      <input type="hidden" name="id" id="modalPedidoId">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Editar Pedido <span id="modalPedidoNum"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Status logístico</label>
+          <select class="form-select" name="status_logistico_id" id="inpStatus">
+            <option value="1">Aguardando Envio</option>
+            <option value="2">Em Trânsito</option>
+            <option value="3">Entregue</option>
+            <option value="4">Atrasado</option>
+          </select>
+        </div>
+        <div class="row">
+          <div class="col mb-3">
+            <label class="form-label">Expedição</label>
+            <input type="date" class="form-control" name="data_expedicao" id="inpExp">
+          </div>
+          <div class="col mb-3">
+            <label class="form-label">Previsão</label>
+            <input type="date" class="form-control" name="data_previsao" id="inpPrev">
+          </div>
+          <div class="col mb-3">
+            <label class="form-label">Entregue</label>
+            <input type="date" class="form-control" name="data_entrega" id="inpEntr">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Transportadora</label>
+          <input type="text" class="form-control" name="transportadora" id="inpTransp" maxlength="80">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Rastreamento</label>
+          <input type="text" class="form-control" name="cod_rastreamento" id="inpRast" maxlength="80">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Frete</label>
+          <input type="text" class="form-control" name="frete" id="inpFrete" maxlength="20">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="submit">Salvar</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+
+
+{% block scripts %}
+<script>
+document.getElementById('editPedidoModal').addEventListener('show.bs.modal', e=>{
+    const btn = e.relatedTarget;
+    document.getElementById('modalPedidoId').value   = btn.dataset.pId;
+    document.getElementById('modalPedidoNum').textContent = '#'+btn.dataset.pNum;
+    document.getElementById('inpStatus').value = btn.dataset.pStatus || '';
+    document.getElementById('inpPrev').value   = btn.dataset.pPrev   || '';
+    document.getElementById('inpEntr').value   = btn.dataset.pEntr   || '';
+    document.getElementById('inpExp').value    = btn.dataset.pExp    || '';
+    document.getElementById('inpTransp').value = btn.dataset.pTransp || '';
+    document.getElementById('inpRast').value   = btn.dataset.pRast   || '';
+    document.getElementById('inpFrete').value  = btn.dataset.pFrete  || '';
+});
+</script>
+{% endblock %}
